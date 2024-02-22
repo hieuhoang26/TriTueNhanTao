@@ -1,3 +1,5 @@
+package AddOn;
+
 import java.io.*;
 import java.util.*;
 
@@ -69,10 +71,6 @@ public class DFSnoFlag {
                         (graph.containsKey(currVer) ? String.join(", ", graph.get(currVer)) : ""),
                         stack.toString()
                 ));
-//            writer.write(currVer + "\t" +
-//                    (graph.containsKey(currVer) ? String.join(", ", graph.get(currVer)) : "") + "\t" +
-//                    visited.keySet() + "\t" +
-//                    stack.toString() + "\n");
             }
         } catch (IOException e) {
             e.printStackTrace();

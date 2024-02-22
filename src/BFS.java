@@ -55,39 +55,6 @@ public class BFS {
     }
 
 
-    public List<String> bfs1(Map<String, String[]> graph) {
-        Map<String, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
-        Map<String, String> parent = new HashMap<>();  // child - parent
-
-        Queue<String> queue = new LinkedList<>();
-        queue.add(startVer);
-        visited.put(startVer, true);
-
-        while (!queue.isEmpty()) {
-            String currVer = queue.poll();
-
-            if (currVer.equals(desVer)) {
-                for (Map.Entry<String, String> entry : parent.entrySet())
-                    System.out.println("Key = " + entry.getKey() +
-                            ", Value = " + entry.getValue());
-                return reconstructPath(parent); // truy vết
-            }
-
-            if (graph.containsKey(currVer)) {
-                for (String near : graph.get(currVer)) {
-                    Boolean isVisited = visited.get(near);
-                    if (isVisited == null || !isVisited) {
-                        visited.put(near, true); // đánh dấu đã được thăm
-                        queue.add(near);
-                        parent.put(near, currVer);
-
-                    }
-                }
-            }
-
-        }
-        return Collections.emptyList();
-    }
 
     public List<String> bfs(Map<String, String[]> graph) {
         Map<String, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
@@ -110,16 +77,12 @@ public class BFS {
                     writer.write(String.format("%-10s| %-20s| %-30s| %-40s\n", desVer, "TT", "", ""));
                     writer.write("-------------------------------------------------------------------------------------");
                     writer.newLine();
-
-
                     List<String> path = reconstructPath(parent); // truy vết
                     writer.write("Path:" );
                     for ( String i : path) {
                         writer.write(i +" ");
                     }
-
                     return path;
-
                 }
 
                 if (graph.containsKey(currVer)) {

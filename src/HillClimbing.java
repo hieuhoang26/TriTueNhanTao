@@ -1,60 +1,11 @@
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
-class Point<T, U> {
-    private T first;
-    private U second;
 
-    public Point() {
-    }
-
-    public Point(T first, U second) {
-        this.first = first;
-        this.second = second;
-    }
-
-    public T getFirst() {
-        return first;
-    }
-
-    public void setFirst(T first) {
-        this.first = first;
-    }
-
-    public U getSecond() {
-        return second;
-    }
-
-    public void setSecond(U second) {
-        this.second = second;
-    }
-
-    @Override
-    public String toString() {
-        return first + "-" + second;
-    }
-
-    public boolean isNull() {
-        return (first == null && second == null);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Point<?, ?> point = (Point<?, ?>) o;
-        return Objects.equals(first, point.first) &&
-                Objects.equals(second, point.second);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(first, second);
-    }
-}
 
 public class HillClimbing {
-    private Point<String, Integer> startVer, desVer;
+    private Node<String, Integer> startVer, desVer;
     private static String filePath = "inputBestFS.txt";
     private static String filePathOut = "outputHillClimb.txt";
 
@@ -62,7 +13,7 @@ public class HillClimbing {
         try {
             HillClimbing x = new HillClimbing();
             // Đọc file và xây dựng đồ thị
-            Map<Point<String, Integer>, Map<String, Integer>> graph = x.readGraphFromFile(filePath);
+            Map<Node<String, Integer>, Map<String, Integer>> graph = x.readGraphFromFile(filePath);
 
             x.printGraph(graph);
             List<String> path = x.hillClimbing(graph);
@@ -78,13 +29,13 @@ public class HillClimbing {
         }
     }
 
-    public Map<Point<String, Integer>, Map<String, Integer>> readGraphFromFile(String filePath) throws IOException {
-        Map<Point<String, Integer>, Map<String, Integer>> graph = new HashMap<>();
-        startVer = new Point<>();
-        desVer = new Point<>();
+    public Map<Node<String, Integer>, Map<String, Integer>> readGraphFromFile(String filePath) throws IOException {
+        Map<Node<String, Integer>, Map<String, Integer>> graph = new HashMap<>();
+        startVer = new Node<>();
+        desVer = new Node<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            Point<String, Integer> currentVertex = new Point<>();
+            Node<String, Integer> currentVertex = new Node<>();
 
             if ((line = reader.readLine()) != null && !line.isEmpty()) {
                 String[] x1 = line.trim().split("\\s+");
@@ -92,9 +43,9 @@ public class HillClimbing {
                     String[] x2 = i.split("-");
                     if (x2.length >= 2) {
                         if (startVer.isNull()) {
-                            startVer = new Point<>(x2[0], Integer.valueOf(x2[1]));
+                            startVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
                         } else {
-                            desVer = new Point<>(x2[0], Integer.valueOf(x2[1]));
+                            desVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
                         }
                     }
                 }
@@ -119,7 +70,7 @@ public class HillClimbing {
                                 }
                                 graph.get(currentVertex).put(neighborVertex, weight);
                             }
-                            currentVertex = new Point<>();
+                            currentVertex = new Node<>();
                         }
                     }
                 }
@@ -128,11 +79,11 @@ public class HillClimbing {
         }
     }
 
-    public void printGraph(Map<Point<String, Integer>, Map<String, Integer>> graph) {
+    public void printGraph(Map<Node<String, Integer>, Map<String, Integer>> graph) {
         System.out.println("start: " + startVer.toString());
         System.out.println("end: " + desVer.toString());
-        for (Map.Entry<Point<String, Integer>, Map<String, Integer>> entry : graph.entrySet()) {
-            Point<String, Integer> point = entry.getKey();
+        for (Map.Entry<Node<String, Integer>, Map<String, Integer>> entry : graph.entrySet()) {
+            Node<String, Integer> point = entry.getKey();
             Map<String, Integer> edges = entry.getValue();
 
             System.out.print(point.getFirst() + "-" + point.getSecond() + " : ");
@@ -146,11 +97,11 @@ public class HillClimbing {
         }
     }
 
-    public List<String> hillClimbing(Map<Point<String, Integer>, Map<String, Integer>> graph) {
-        Map<Point<String, Integer>, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
-        Map<Point<String, Integer>, Point<String, Integer>> parent = new HashMap<>();  // child - parent
+    public List<String> hillClimbing(Map<Node<String, Integer>, Map<String, Integer>> graph) {
+        Map<Node<String, Integer>, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
+        Map<Node<String, Integer>, Node<String, Integer>> parent = new HashMap<>();  // child - parent
 
-        Stack<Point<String, Integer>> L = new Stack<>();
+        Stack<Node<String, Integer>> L = new Stack<>();
 
         L.add(startVer);
         visited.put(startVer, true);
@@ -161,7 +112,7 @@ public class HillClimbing {
             writer.newLine();
 
             while (!L.isEmpty()) {
-                Point<String, Integer> currPoint = L.pop();
+                Node<String, Integer> currPoint = L.pop();
 
                 if (currPoint.equals(desVer)) {
                     writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", desVer, "TT", "", ""));
@@ -190,7 +141,7 @@ public class HillClimbing {
                             );
 
                     for (Map.Entry<String, Integer> entry : sortedMap.entrySet()) {
-                        Point<String, Integer> nextPoint = new Point<>(entry.getKey(), entry.getValue());
+                        Node<String, Integer> nextPoint = new Node<>(entry.getKey(), entry.getValue());
                         Boolean isVisited = visited.get(nextPoint);
                         if (isVisited == null || !isVisited) {
                             visited.put(nextPoint, true);
@@ -217,14 +168,14 @@ public class HillClimbing {
     }
 
     // Đánh giá trạng thái
-    private int evaluateState(Point<String, Integer> state) {
+    private int evaluateState(Node<String, Integer> state) {
         return state.getSecond(); // Đánh giá theo trọng số cạnh
     }
 
 
-    public List<String> reconstructPath(Map<Point<String, Integer>, Point<String, Integer>> parent) {
+    public List<String> reconstructPath(Map<Node<String, Integer>, Node<String, Integer>> parent) {
         List<String> path = new ArrayList<>();
-        Point<String, Integer> current = desVer;
+        Node<String, Integer> current = desVer;
 
         while (current != null) {
             path.add(current.getFirst());
