@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.Inet4Address;
 import java.util.*;
 
 
@@ -99,8 +100,7 @@ public class BestFirstSearch {
         Map<Node<String, Integer>, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
         Map<String, String> parent = new HashMap<>();  // child - parent
 
-        PriorityQueue<Node<String, Integer>> queue = new PriorityQueue<>(Comparator.comparingInt(Node::getSecond));
-        //Queue<Point<String, Integer>> queue = new LinkedList<>();
+        Queue<Node<String, Integer>> queue = new LinkedList<>();
 
         // Thêm điểm bắt đầu vào hàng đợi
         queue.add(startVer);
@@ -137,6 +137,7 @@ public class BestFirstSearch {
                         if (isVisited == null || !isVisited) {
                             visited.put(nextPoint, true);
                             queue.add(nextPoint);
+                            sortQueue(queue);
                             parent.put(nextPoint.getFirst(), currPoint.getFirst());
                         }
                     }
@@ -171,6 +172,15 @@ public class BestFirstSearch {
         }
         Collections.reverse(path);
         return path;
+    }
+    private void sortQueue(Queue<Node<String,Integer>> queue){
+        List<Node<String, Integer>> temp = new ArrayList<>();
+        while (!queue.isEmpty()){
+            temp.add(queue.poll());
+        }
+        Collections.sort(temp,Comparator.comparingInt(this::smallestEdgeWeight));
+        queue.clear();
+        queue.addAll(temp);
     }
     private int smallestEdgeWeight(Node<String, Integer> Point) {
         return Point.getSecond();

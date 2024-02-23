@@ -1,16 +1,14 @@
-package AddOn;
-
 import java.io.*;
 import java.util.*;
 
-public class DFS {
+public class DFSnoFlag {
     private String startVer, desVer;
     private static String filePath = "inputBFS.txt";
-    private static String filePathOut = "outputDFS.txt";
+    private static String filePathOut = "outputDFSnoFlag.txt";
 
     public static void main(String[] args) {
         try {
-            DFS x = new DFS();
+            DFSnoFlag x = new DFSnoFlag();
             // Đọc file và xây dựng đồ thị
             Map<String, String[]> graph = x.readGraphFromFile(filePath);
 
@@ -29,15 +27,15 @@ public class DFS {
         }
     }
     public List<String> dfs(Map<String, String[]> graph) {
-        Map<String, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
+
         Map<String, String> parent = new HashMap<>();  // child - parent
 
         Stack<String> stack = new Stack<>();
         stack.add(startVer);
-        visited.put(startVer, true);
+
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
-            writer.write(String.format("%-10s| %-20s| %-30s| %-40s\n", "Vertex", "Neighbors", "Visited", "In stack"));
+            writer.write(String.format("%-10s| %-20s| %-40s\n", "Vertex", "Neighbors", "In stack"));
             writer.write("-------------------------------------------------------------------------------------");
             writer.newLine();
 
@@ -46,7 +44,7 @@ public class DFS {
                 String currVer = stack.pop();
 
                 if (currVer.equals(desVer)) {
-                    writer.write(String.format("%-10s| %-20s| %-30s| %-40s\n", desVer, "TT", "", ""));
+                    writer.write(String.format("%-10s| %-20s| %-40s\n", desVer, "TT", ""));
                     writer.write("-------------------------------------------------------------------------------------");
                     writer.newLine();
 
@@ -61,19 +59,14 @@ public class DFS {
 
                 if (graph.containsKey(currVer)) {
                     for (String near : graph.get(currVer)) {
-                        Boolean isVisited = visited.get(near);
-                        if (isVisited == null || !isVisited) {
-                            visited.put(near, true); // đánh dấu đã được thăm
                             stack.add(near);
                             parent.put(near, currVer);
-                        }
                     }
                 }
 
                 // Ghi thông tin vào file
-                writer.write(String.format("%-10s| %-20s| %-30s| %-40s\n", currVer,
+                writer.write(String.format("%-10s| %-20s| %-40s\n", currVer,
                         (graph.containsKey(currVer) ? String.join(", ", graph.get(currVer)) : ""),
-                        visited.keySet(),
                         stack.toString()
                 ));
             }

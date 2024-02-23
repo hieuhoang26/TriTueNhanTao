@@ -2,14 +2,14 @@ import java.io.*;
 import java.util.*;
 
 
-public class Astar {
+public class NhanhVsCan {
     private Node<String, Integer> startVer, desVer;
     private static String filePath = "inputA.txt";
-    private static String filePathOut = "outputAstar.txt";
+    private static String filePathOut = "outputNhanhCan.txt";
 
     public static void main(String[] args) {
         try {
-            Astar x = new Astar();
+            NhanhVsCan x = new NhanhVsCan();
             // Đọc file và xây dựng đồ thị
             Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph = x.readGraphFromFile(filePath);
 
@@ -106,8 +106,8 @@ public class Astar {
     public List<String> bfs(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
         //Map<Point<String, Integer>, Point<String, Integer>> parent = new HashMap<>();  // child - parent
         Map<String, String> parent = new HashMap<>();  // child - parent
-        Map<String, Integer> fv = new HashMap<>();
-
+        Map<String,Integer> fv = new HashMap<>();
+        
         Integer costFinal = 0;
 
 
@@ -115,10 +115,10 @@ public class Astar {
 
         // Thêm điểm bắt đầu vào hàng đợi
         queue.add(startVer);
-
+        
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
-            writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", "TT", "TTK", "k(u,v)", "h(v)", "g(v)", "f(v)", "L"));
+            writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", "TT", "TTK", "k(u,v)", "h(v)","g(v)", "f(v)", "L"));
             writer.write("-------------------------------------------------------------------------------------");
             writer.newLine();
 
@@ -126,7 +126,7 @@ public class Astar {
                 Node<String, Integer> currPoint = queue.poll();
 
                 if ((currPoint.getFirst()).equals(desVer.getFirst())) {
-                    writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", desVer.getFirst(), "TT", "", "", "", "", ""));
+                    writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", desVer.getFirst(), "TT", "", "", "", "",""));
                     writer.write("-------------------------------------------------------------------------------------");
                     writer.newLine();
 
@@ -139,14 +139,14 @@ public class Astar {
                     }
                     return path;
                 }
-                if (containNode(graph, currPoint.getFirst())) {
+                if (containNode(graph,currPoint.getFirst())) {
                     //Map<Node<String, Integer>, Integer> neighbors = graph.get(currPoint);
-                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
+                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph,currPoint.getFirst()));
 
                     for (Map.Entry<Node<String, Integer>, Integer> entry : neighbors.entrySet()) {
-                        Integer k = 0; // chi phí k(u,v)
-                        Integer h = 0; // h(x)
-                        Integer f = 0; // f(x)
+                        Integer k=0; // chi phí k(u,v)
+                        Integer h=0; // h(x)
+                        Integer f=0; // f(x)
                         Integer g; // g(x)
                         if (currPoint.equals(desVer)) {
                             g = 0;
@@ -154,16 +154,16 @@ public class Astar {
                             Integer gValue = fv.get(currPoint.getFirst());
                             g = gValue != null ? gValue : 0;
                         }
-
+                        
                         Node<String, Integer> nextPoint = entry.getKey();
                         k = entry.getValue(); // chi phí
 
                         h = nextPoint.getSecond(); //h(x)
-                        g = g + k;
+                        g = g + k; 
                         f = g + h;
-                        fv.put(nextPoint.getFirst(), g);
-                        if ((nextPoint.getFirst()).equals(desVer.getFirst())) {
-                            costFinal = g;
+                        fv.put(nextPoint.getFirst(),g);
+                        if((nextPoint.getFirst()).equals(desVer.getFirst())){
+                            costFinal=g;
                         }
                         queue.add(new Node<>(nextPoint.getFirst(), f));
                         sortQueue(queue);
@@ -172,7 +172,7 @@ public class Astar {
                         //Ghi thông tin vào file
                         writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", currPoint.getFirst(),
                                 nextPoint.getFirst(),
-                                k, h, g, f,
+                                k,h,g,f,
                                 queue.toString()
                         ));
                     }
@@ -189,7 +189,6 @@ public class Astar {
         }
         return Collections.emptyList();
     }
-
     private boolean containNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
         for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
             Node<String, Integer> key = entry.getKey();
@@ -208,14 +207,17 @@ public class Astar {
         }
         return null;
     }
-    private void sortQueue(Queue<Node<String, Integer>> queue) {
+    private void sortQueue(Queue<Node<String,Integer>> queue){
         List<Node<String, Integer>> temp = new ArrayList<>();
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty()){
             temp.add(queue.poll());
         }
-        Collections.sort(temp, new NodeComparator());
+        Collections.sort(temp,Comparator.comparingInt(this::smallestEdgeWeight));
         queue.clear();
         queue.addAll(temp);
+    }
+    private int smallestEdgeWeight(Node<String, Integer> Point) {
+        return Point.getSecond();
     }
 
     public List<String> reconstructPath(Map<String, String> parent) {
