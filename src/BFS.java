@@ -58,6 +58,7 @@ public class BFS {
 
     public List<String> bfs(Map<String, String[]> graph) {
         Map<String, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
+
         Map<String, String> parent = new HashMap<>();  // child - parent
 
         Queue<String> queue = new LinkedList<>();

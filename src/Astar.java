@@ -104,12 +104,11 @@ public class Astar {
     }
 
     public List<String> bfs(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
-        //Map<Point<String, Integer>, Point<String, Integer>> parent = new HashMap<>();  // child - parent
         Map<String, String> parent = new HashMap<>();  // child - parent
+
         Map<String, Integer> fv = new HashMap<>();
 
-        Integer costFinal = 0;
-
+        Integer costFinal = 0; // chi phi cuoi cung
 
         Queue<Node<String, Integer>> queue = new LinkedList<>();
 

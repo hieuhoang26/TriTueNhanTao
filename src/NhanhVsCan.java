@@ -1,5 +1,7 @@
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 
 public class NhanhVsCan {
@@ -106,47 +108,61 @@ public class NhanhVsCan {
     public List<String> bfs(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
         //Map<Point<String, Integer>, Point<String, Integer>> parent = new HashMap<>();  // child - parent
         Map<String, String> parent = new HashMap<>();  // child - parent
-        Map<String,Integer> fv = new HashMap<>();
-        
+        Map<String, Integer> fv = new HashMap<>();
+
         Integer costFinal = 0;
 
 
-        Queue<Node<String, Integer>> queue = new LinkedList<>();
+        Stack<Node<String, Integer>> stackL = new Stack<>();
 
         // Thêm điểm bắt đầu vào hàng đợi
-        queue.add(startVer);
-        
+        stackL.add(startVer);
+
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
-            writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", "TT", "TTK", "k(u,v)", "h(v)","g(v)", "f(v)", "L"));
-            writer.write("-------------------------------------------------------------------------------------");
+            writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-30s| %-40s\n", "TT", "TTK", "k(u,v)", "h(v)", "g(v)", "f(v)", "L1", "L"));
+            writer.write("------------------------------------------------------------------------------------------------------------");
             writer.newLine();
 
-            while (!queue.isEmpty()) {
-                Node<String, Integer> currPoint = queue.poll();
-
-                if ((currPoint.getFirst()).equals(desVer.getFirst())) {
-                    writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", desVer.getFirst(), "TT", "", "", "", "",""));
-                    writer.write("-------------------------------------------------------------------------------------");
+            while (!stackL.isEmpty()) {
+                Node<String, Integer> currPoint = stackL.pop();
+                Stack<Node<String,Integer>> stackCopy = new Stack<>();
+                stackCopy.addAll(stackL);
+                System.out.println(stackCopy.toString());
+                System.out.println(costFinal);
+                //if ((currPoint.getFirst()).equals(desVer.getFirst())  && checkEnd(stackCopy,costFinal)) {
+                if ((currPoint.getFirst()).equals(desVer.getFirst()) ) {
+                    writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-30s| %-40s\n", desVer.getFirst(), "TT", "", "", "", costFinal, "", ""));
+                    writer.write("------------------------------------------------------------------------------------------------------------");
                     writer.newLine();
 
-                    List<String> path = reconstructPath(parent); // truy vết
-                    writer.write("Cost: " + costFinal);
-                    writer.newLine();
-                    writer.write("Path:");
-                    for (String i : path) {
-                        writer.write(i + " ");
+                    if(checkEnd(stackCopy,costFinal)){
+//                        writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-30s| %-40s\n", desVer.getFirst(), "TT", "", "", "", "", "", ""));
+//                        writer.write("------------------------------------------------------------------------------------------------------------");
+//                        writer.newLine();
+
+                        List<String> path = reconstructPath(parent); // truy vết
+                        writer.write("Cost: " + costFinal);
+                        writer.newLine();
+                        writer.write("Path:");
+                        for (String i : path) {
+                            writer.write(i + " ");
+                        }
+                        return path;
                     }
-                    return path;
                 }
-                if (containNode(graph,currPoint.getFirst())) {
-                    //Map<Node<String, Integer>, Integer> neighbors = graph.get(currPoint);
-                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph,currPoint.getFirst()));
+
+
+                if (containNode(graph, currPoint.getFirst())) {
+
+                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
+
+                    List<Node<String, Integer>> listL1 = new ArrayList<>();
 
                     for (Map.Entry<Node<String, Integer>, Integer> entry : neighbors.entrySet()) {
-                        Integer k=0; // chi phí k(u,v)
-                        Integer h=0; // h(x)
-                        Integer f=0; // f(x)
+                        Integer k = 0; // chi phí k(u,v)
+                        Integer h = 0; // h(x)
+                        Integer f = 0; // f(x)
                         Integer g; // g(x)
                         if (currPoint.equals(desVer)) {
                             g = 0;
@@ -154,29 +170,38 @@ public class NhanhVsCan {
                             Integer gValue = fv.get(currPoint.getFirst());
                             g = gValue != null ? gValue : 0;
                         }
-                        
+
                         Node<String, Integer> nextPoint = entry.getKey();
                         k = entry.getValue(); // chi phí
 
                         h = nextPoint.getSecond(); //h(x)
-                        g = g + k; 
+                        g = g + k;
                         f = g + h;
-                        fv.put(nextPoint.getFirst(),g);
-                        if((nextPoint.getFirst()).equals(desVer.getFirst())){
-                            costFinal=g;
-                        }
-                        queue.add(new Node<>(nextPoint.getFirst(), f));
-                        sortQueue(queue);
-                        parent.put(nextPoint.getFirst(), currPoint.getFirst());
+                        fv.put(nextPoint.getFirst(), g);
 
+                        if ((nextPoint.getFirst()).equals(desVer.getFirst())) {
+                            costFinal = g;
+                        }
+
+                        listL1.add(new Node<>(nextPoint.getFirst(), f));
+
+                        parent.put(nextPoint.getFirst(), currPoint.getFirst());
                         //Ghi thông tin vào file
-                        writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", currPoint.getFirst(),
+                        writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-30s| %-40s\n", currPoint.getFirst(),
                                 nextPoint.getFirst(),
-                                k,h,g,f,
-                                queue.toString()
+                                k, h, g, f,
+                                "", ""
                         ));
                     }
-                    writer.write("-------------------------------------------------------------------------------------");
+                    Collections.sort(listL1, new NodeComparator());
+                    Collections.reverse(listL1);
+                    stackL.addAll(listL1);
+                    writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-30s| %-40s\n", "",
+                            "", "", "", "", "",
+                            listL1.toString(),
+                            stackL.toString()
+                    ));
+                    writer.write("------------------------------------------------------------------------------------------------------------");
                     writer.newLine();
                 }
 
@@ -189,6 +214,18 @@ public class NhanhVsCan {
         }
         return Collections.emptyList();
     }
+    private boolean checkEnd(Stack<Node<String,Integer>> stack, Integer x){
+        int size = stack.size();
+        int k=0;
+        while (!stack.isEmpty()) {
+            Node<String,Integer> element = stack.pop();
+            if(element.getSecond() > x){
+               k++;
+            }
+        }
+        if(k==size) return true;
+        else  return  false;
+    }
     private boolean containNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
         for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
             Node<String, Integer> key = entry.getKey();
@@ -198,6 +235,7 @@ public class NhanhVsCan {
         }
         return false;
     }
+
     private Node<String, Integer> getContainNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
         for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
             Node<String, Integer> key = entry.getKey();
@@ -206,18 +244,6 @@ public class NhanhVsCan {
             }
         }
         return null;
-    }
-    private void sortQueue(Queue<Node<String,Integer>> queue){
-        List<Node<String, Integer>> temp = new ArrayList<>();
-        while (!queue.isEmpty()){
-            temp.add(queue.poll());
-        }
-        Collections.sort(temp,Comparator.comparingInt(this::smallestEdgeWeight));
-        queue.clear();
-        queue.addAll(temp);
-    }
-    private int smallestEdgeWeight(Node<String, Integer> Point) {
-        return Point.getSecond();
     }
 
     public List<String> reconstructPath(Map<String, String> parent) {
