@@ -9,7 +9,6 @@ public class BFS {
     public static void main(String[] args) {
         try {
             BFS x = new BFS();
-            // Đọc file và xây dựng đồ thị
             Map<String, String[]> graph = x.readGraphFromFile(filePath);
 
             x.printGraph(graph);
@@ -20,8 +19,6 @@ public class BFS {
             } else {
                 System.out.println("No path found.");
             }
-            //writeGraphToFile(graph,filePathOut);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -37,23 +34,27 @@ public class BFS {
                 String[] x = line.split("\\s+");
                 startVer = x[0];
                 desVer = x[1];
+
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
-                    if (!line.isEmpty()) {
-                        if (currentVertex == null) {
-                            currentVertex = line;
-                        } else {
-                            String[] neighbors = line.split("\\s+");
-                            graph.put(currentVertex, neighbors);
-                            currentVertex = null;
-                        }
-                    }
+//                    if (currentVertex == null) {
+//                        currentVertex = line;
+//                    } else {
+//                        String[] neighbors = line.split("\\s+");
+//                        graph.put(currentVertex, neighbors);
+//                        currentVertex = null;
+                    String[] parts = line.split(" : ");
+                    if (parts.length == 2) {
+                        String key = parts[0];
+                        String[] values = parts[1].split(" ");
+                        graph.put(key, values); 
+                   }
+
                 }
             }
             return graph;
         }
     }
-
 
 
     public List<String> bfs(Map<String, String[]> graph) {
@@ -79,9 +80,9 @@ public class BFS {
                     writer.write("-------------------------------------------------------------------------------------");
                     writer.newLine();
                     List<String> path = reconstructPath(parent); // truy vết
-                    writer.write("Path:" );
-                    for ( String i : path) {
-                        writer.write(i +" ");
+                    writer.write("Path:");
+                    for (String i : path) {
+                        writer.write(i + " ");
                     }
                     return path;
                 }
@@ -90,11 +91,13 @@ public class BFS {
                     for (String near : graph.get(currVer)) {
                         Boolean isVisited = visited.get(near);
                         if (isVisited == null || !isVisited) {
-                            visited.put(near, true); // đánh dấu đã được thăm
                             queue.add(near);
                             parent.put(near, currVer);
+                            visited.put(near, true);
                         }
                     }
+
+
                 }
 
                 // Ghi thông tin vào file
@@ -138,7 +141,6 @@ public class BFS {
             System.out.println();
         }
     }
-
 
 
 }
