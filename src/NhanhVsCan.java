@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public class NhanhVsCan {
-    private Node<String, Integer> startVer, desVer;
+    private Node startVer, desVer;
     private static String filePath = "inputA.txt";
     private static String filePathOut = "outputNhanhCan.txt";
 
@@ -13,7 +13,7 @@ public class NhanhVsCan {
         try {
             NhanhVsCan x = new NhanhVsCan();
             // Đọc file và xây dựng đồ thị
-            Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph = x.readGraphFromFile(filePath);
+            Map<Node, Map<Node, Integer>> graph = x.readGraphFromFile(filePath);
 
             x.printGraph(graph);
             List<String> path = x.bfs(graph);
@@ -29,13 +29,13 @@ public class NhanhVsCan {
         }
     }
 
-    public Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> readGraphFromFile(String filePath) throws IOException {
-        Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph = new HashMap<>();
-        startVer = new Node<>();
-        desVer = new Node<>();
+    public Map<Node, Map<Node, Integer>> readGraphFromFile(String filePath) throws IOException {
+        Map<Node, Map<Node, Integer>> graph = new HashMap<>();
+        startVer = new Node();
+        desVer = new Node();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            Node<String, Integer> currentVertex = new Node<>();
+            Node currentVertex = new Node();
 
             if ((line = reader.readLine()) != null && !line.isEmpty()) {
                 String[] x1 = line.trim().split("\\s+");
@@ -43,9 +43,9 @@ public class NhanhVsCan {
                     String[] x2 = i.split("-");
                     if (x2.length >= 2) {
                         if (startVer.isNull()) {
-                            startVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            startVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         } else {
-                            desVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            desVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         }
                     }
                 }
@@ -70,13 +70,13 @@ public class NhanhVsCan {
                                 String[] n2 = key.split("-");
                                 String neighborVertex = n2[0];
                                 int weight = Integer.parseInt(n2[1]);
-                                Node<String, Integer> x = new Node<>(neighborVertex, weight);
+                                Node x = new Node(neighborVertex, weight);
                                 if (!graph.containsKey(currentVertex)) {
                                     graph.put(currentVertex, new HashMap<>());
                                 }
                                 graph.get(currentVertex).put(x, Integer.parseInt(value));
                             }
-                            currentVertex = new Node<>();
+                            currentVertex = new Node();
                         }
                     }
                 }
@@ -85,19 +85,19 @@ public class NhanhVsCan {
         }
     }
 
-    public void printGraph(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
+    public void printGraph(Map<Node, Map<Node, Integer>> graph) {
         System.out.println("start: " + startVer.toString());
         if (desVer != null) {
             System.out.println("end: " + desVer.toString());
         }
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> vertex = entry.getKey();
-            Map<Node<String, Integer>, Integer> edges = entry.getValue();
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node vertex = entry.getKey();
+            Map<Node, Integer> edges = entry.getValue();
 
             System.out.print(vertex.toString() + " : ");
 
-            for (Map.Entry<Node<String, Integer>, Integer> edgeEntry : edges.entrySet()) {
-                Node<String, Integer> neighbor = edgeEntry.getKey();
+            for (Map.Entry<Node, Integer> edgeEntry : edges.entrySet()) {
+                Node neighbor = edgeEntry.getKey();
                 int weight = edgeEntry.getValue();
                 System.out.print(neighbor.toString() + "(" + weight + ")" + "  ");
             }
@@ -105,7 +105,7 @@ public class NhanhVsCan {
         }
     }
 
-    public List<String> bfs(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
+    public List<String> bfs(Map<Node, Map<Node, Integer>> graph) {
         //Map<Point<String, Integer>, Point<String, Integer>> parent = new HashMap<>();  // child - parent
         Map<String, String> parent = new HashMap<>();  // child - parent
         Map<String, Integer> fv = new HashMap<>();
@@ -113,7 +113,7 @@ public class NhanhVsCan {
         Integer costFinal = 0;
 
 
-        Stack<Node<String, Integer>> stackL = new Stack<>();
+        Stack<Node> stackL = new Stack<>();
 
         // Thêm điểm bắt đầu vào hàng đợi
         stackL.add(startVer);
@@ -125,8 +125,8 @@ public class NhanhVsCan {
             writer.newLine();
 
             while (!stackL.isEmpty()) {
-                Node<String, Integer> currPoint = stackL.pop();
-                Stack<Node<String,Integer>> stackCopy = new Stack<>();
+                Node currPoint = stackL.pop();
+                Stack<Node> stackCopy = new Stack<>();
                 stackCopy.addAll(stackL);
                 System.out.println(stackCopy.toString());
                 System.out.println(costFinal);
@@ -155,11 +155,11 @@ public class NhanhVsCan {
 
                 if (containNode(graph, currPoint.getFirst())) {
 
-                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
+                    Map<Node, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
 
-                    List<Node<String, Integer>> listL1 = new ArrayList<>();
+                    List<Node> listL1 = new ArrayList<>();
 
-                    for (Map.Entry<Node<String, Integer>, Integer> entry : neighbors.entrySet()) {
+                    for (Map.Entry<Node, Integer> entry : neighbors.entrySet()) {
                         Integer k = 0; // chi phí k(u,v)
                         Integer h = 0; // h(x)
                         Integer f = 0; // f(x)
@@ -171,7 +171,7 @@ public class NhanhVsCan {
                             g = gValue != null ? gValue : 0;
                         }
 
-                        Node<String, Integer> nextPoint = entry.getKey();
+                        Node nextPoint = entry.getKey();
                         k = entry.getValue(); // chi phí
 
                         h = nextPoint.getSecond(); //h(x)
@@ -183,7 +183,7 @@ public class NhanhVsCan {
                             costFinal = g;
                         }
 
-                        listL1.add(new Node<>(nextPoint.getFirst(), f));
+                        listL1.add(new Node(nextPoint.getFirst(), f));
 
                         parent.put(nextPoint.getFirst(), currPoint.getFirst());
                         //Ghi thông tin vào file
@@ -214,11 +214,11 @@ public class NhanhVsCan {
         }
         return Collections.emptyList();
     }
-    private boolean checkEnd(Stack<Node<String,Integer>> stack, Integer x){
+    private boolean checkEnd(Stack<Node> stack, Integer x){
         int size = stack.size();
         int k=0;
         while (!stack.isEmpty()) {
-            Node<String,Integer> element = stack.pop();
+            Node element = stack.pop();
             if(element.getSecond() > x){
                k++;
             }
@@ -226,9 +226,9 @@ public class NhanhVsCan {
         if(k==size) return true;
         else  return  false;
     }
-    private boolean containNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> key = entry.getKey();
+    private boolean containNode(Map<Node, Map<Node, Integer>> graph, String string) {
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node key = entry.getKey();
             if (key.getFirst().equals(string)) {
                 return true;
             }
@@ -236,9 +236,9 @@ public class NhanhVsCan {
         return false;
     }
 
-    private Node<String, Integer> getContainNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> key = entry.getKey();
+    private Node getContainNode(Map<Node, Map<Node, Integer>> graph, String string) {
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node key = entry.getKey();
             if (key.getFirst().equals(string)) {
                 return key;
             }

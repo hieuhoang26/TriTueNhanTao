@@ -4,7 +4,7 @@ import java.util.*;
 
 
 public class BestFirstSearch {
-    private Node<String, Integer> startVer, desVer;
+    private Node startVer, desVer;
     private static String filePath = "inputBestFS.txt";
     private static String filePathOut = "outputBestFS.txt";
 
@@ -12,10 +12,10 @@ public class BestFirstSearch {
         try {
             BestFirstSearch x = new BestFirstSearch();
             // Đọc file và xây dựng đồ thị
-            Map<Node<String, Integer>, Map<String, Integer>> graph = x.readGraphFromFile(filePath);
+            Map<Node,List<Node>> graph = x.readGraphFromFile(filePath);
 
             x.printGraph(graph);
-            List<String> path = x.bfs(graph);
+            List<String> path = x.bestfs(graph);
 
             if (!path.isEmpty()) {
                 System.out.println("Shortest path: " + path);
@@ -28,13 +28,13 @@ public class BestFirstSearch {
         }
     }
 
-    public Map<Node<String, Integer>, Map<String, Integer>> readGraphFromFile(String filePath) throws IOException {
-        Map<Node<String, Integer>, Map<String, Integer>> graph = new HashMap<>();
-        startVer = new Node<>();
-        desVer = new Node<>();
+    public Map<Node, List<Node>> readGraphFromFile(String filePath) throws IOException {
+
+        Map<Node, List<Node>> graph = new HashMap<>();
+        startVer = new Node();
+        desVer = new Node();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            Node<String, Integer> currentVertex = new Node<>();
 
             if ((line = reader.readLine()) != null && !line.isEmpty()) {
                 String[] x1 = line.trim().split("\\s+");
@@ -42,123 +42,97 @@ public class BestFirstSearch {
                     String[] x2 = i.split("-");
                     if (x2.length >= 2) {
                         if (startVer.isNull()) {
-                            startVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            startVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         } else {
-                            desVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            desVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         }
                     }
                 }
 
-
                 while ((line = reader.readLine()) != null) {
-                    line = line.trim();
-                    if (!line.isEmpty()) {
-                        if (currentVertex.isNull()) {
-                            String[] parts = line.split("-");
-                            currentVertex.setFirst(parts[0]);
-                            currentVertex.setSecond(Integer.valueOf(parts[1]));
-                        } else {
-                            String[] n1 = line.split("\\s+");
-                            for (String i : n1) {
-                                String[] n2 = i.split("-");
-                                String neighborVertex = n2[0];
-                                int weight = Integer.parseInt(n2[1]);
+                    Node currentVertex = new Node();
+                    List<Node> neighbors = new ArrayList<>();
 
-                                if (!graph.containsKey(currentVertex)) {
-                                    graph.put(currentVertex, new HashMap<>());
-                                }
-                                graph.get(currentVertex).put(neighborVertex, weight);
-                            }
-                            currentVertex = new Node<>();
-                        }
+                    line = line.trim();
+                    String[] list = line.split(" : ");
+                    currentVertex.readNode(list[0]);
+                    String[] list2 = list[1].split("\\s+");
+                    for (String i : list2) {
+                        Node x = new Node();
+                        x.readNode(i);
+                        neighbors.add(x);
                     }
+                    graph.put(currentVertex,neighbors);
                 }
             }
             return graph;
         }
     }
 
-    public void printGraph(Map<Node<String, Integer>, Map<String, Integer>> graph) {
+    public void printGraph(Map<Node, List<Node>> graph) {
         System.out.println("start: " + startVer.toString());
         System.out.println("end: " + desVer.toString());
-        for (Map.Entry<Node<String, Integer>, Map<String, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> Point = entry.getKey();
-            Map<String, Integer> edges = entry.getValue();
 
-            System.out.print(Point.getFirst() + "-" + Point.getSecond() + " : ");
+        for (Map.Entry<Node, List<Node>> entry : graph.entrySet()) {
+            Node node = entry.getKey();
+            List<Node> neighbors = entry.getValue();
 
-            for (Map.Entry<String, Integer> edgeEntry : edges.entrySet()) {
-                String neighbor = edgeEntry.getKey();
-                int weight = edgeEntry.getValue();
-                System.out.print(neighbor + "-" + weight + "  ");
+            System.out.print(node + " : ");
+
+            for (Node neighbor : neighbors) {
+                System.out.print(neighbor + " ");
             }
             System.out.println();
         }
     }
 
-    public List<String> bfs(Map<Node<String, Integer>, Map<String, Integer>> graph) {
-        Map<Node<String, Integer>, Boolean> visited = new HashMap<>(); // đỉnh đã thăm
+    public List<String> bestfs(Map<Node, List<Node>> graph) {
         Map<String, String> parent = new HashMap<>();  // child - parent
 
-        Queue<Node<String, Integer>> queue = new LinkedList<>();
+        Queue<Node> queue = new LinkedList<>();
 
-        // Thêm điểm bắt đầu vào hàng đợi
+
         queue.add(startVer);
-        visited.put(startVer, true);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
-            writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", "Vertex", "Neighbors", "Visited", "In Queue"));
+            writer.write(String.format("%-10s| %-20s| %-40s\n", "Vertex", "Neighbors", "In Queue"));
             writer.write("-------------------------------------------------------------------------------------");
             writer.newLine();
 
             while (!queue.isEmpty()) {
-                Node<String, Integer> currPoint = queue.poll();
+                Node currPoint = queue.poll();
 
                 if (currPoint.equals(desVer)) {
-                    writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", desVer, "TT", "", ""));
+                    writer.write(String.format("%-10s| %-20s| %-40s\n", desVer.getFirst(), "TT", ""));
                     writer.write("-------------------------------------------------------------------------------------");
                     writer.newLine();
 
                     List<String> path = reconstructPath(parent); // truy vết
-
                     writer.write("Path:");
                     for (String i : path) {
                         writer.write(i + " ");
                     }
-
                     return path;
                 }
 
                 if (graph.containsKey(currPoint)) {
-                    Map<String, Integer> neighbors = graph.get(currPoint);
-                    for (Map.Entry<String, Integer> entry : neighbors.entrySet()) {
-                        Node<String, Integer> nextPoint = new Node<>(entry.getKey(), entry.getValue());
-                        Boolean isVisited = visited.get(nextPoint);
-                        if (isVisited == null || !isVisited) {
-                            visited.put(nextPoint, true);
+                    List<Node> neighbors = graph.get(currPoint);
+                    for (Node entry : neighbors) {
+                        Node nextPoint = new Node(entry.getFirst(), entry.getSecond());
                             queue.add(nextPoint);
                             sortQueue(queue);
                             parent.put(nextPoint.getFirst(), currPoint.getFirst());
-                        }
                     }
-
-
                 }
-                //             Ghi thông tin vào file
-                writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", currPoint.getFirst(),
-                        (graph.containsKey(currPoint) ? graph.get(currPoint).keySet() : ""),
-                        visited.keySet(),
+                writer.write(String.format("%-10s| %-20s| %-40s\n", currPoint.getFirst(),
+                        (graph.containsKey(currPoint) ? graph.get(currPoint) : ""),
                         queue.toString()
                 ));
             }
-
-
         } catch (
                 IOException e) {
             e.printStackTrace();
         }
-
-        // Trả về một danh sách rỗng nếu không tìm thấy đường đi từ startPoint đến desVer
         return Collections.emptyList();
     }
 
@@ -173,8 +147,8 @@ public class BestFirstSearch {
         Collections.reverse(path);
         return path;
     }
-    private void sortQueue(Queue<Node<String,Integer>> queue){
-        List<Node<String, Integer>> temp = new ArrayList<>();
+    private void sortQueue(Queue<Node> queue){
+        List<Node> temp = new ArrayList<>();
         while (!queue.isEmpty()){
             temp.add(queue.poll());
         }
@@ -182,7 +156,7 @@ public class BestFirstSearch {
         queue.clear();
         queue.addAll(temp);
     }
-    private int smallestEdgeWeight(Node<String, Integer> Point) {
+    private int smallestEdgeWeight(Node Point) {
         return Point.getSecond();
     }
 

@@ -1,33 +1,38 @@
 import java.util.Objects;
 
-public class Node<T,U>{
-    private T first;
-    private U second;
+public class Node{
+    private String first;
+    private Integer second;
 
     public Node() {
     }
 
-    public Node(T first, U second) {
+    public Node(String first, Integer second) {
         this.first = first;
         this.second = second;
     }
 
-    public T getFirst() {
+    public String getFirst() {
         return first;
     }
 
-    public void setFirst(T first) {
+    public void setFirst(String first) {
         this.first = first;
     }
 
-    public U getSecond() {
+    public Integer getSecond() {
         return second;
     }
 
-    public void setSecond(U second) {
+    public void setSecond(Integer second) {
         this.second = second;
     }
 
+    public void readNode (String string ){
+        String[] x = string.split("-");
+        this.first = x[0];
+        this.second = Integer.parseInt(x[1]);
+    }
     @Override
     public String toString() {
         return first + "-" + second;
@@ -40,10 +45,8 @@ public class Node<T,U>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Node<?, ?> point = (Node<?, ?>) o;
-        return Objects.equals(first, point.first) &&
-                Objects.equals(second, point.second);
+        if (!(o instanceof Node node)) return false;
+        return Objects.equals(getFirst(), node.getFirst()) && Objects.equals(getSecond(), node.getSecond());
     }
 
     @Override

@@ -105,15 +105,13 @@ public class DFS {
                 desVer = x[1];
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
-                    if (!line.isEmpty()) {
-                        if (currentVertex == null) {
-                            currentVertex = line;
-                        } else {
-                            String[] neighbors = line.split("\\s+");
-                            graph.put(currentVertex, neighbors);
-                            currentVertex = null;
-                        }
+                    String[] parts = line.split(" : ");
+                    if (parts.length == 2) {
+                        String key = parts[0];
+                        String[] values = parts[1].split(" ");
+                        graph.put(key, values);
                     }
+
                 }
             }
             return graph;

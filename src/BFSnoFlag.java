@@ -88,7 +88,6 @@ public class BFSnoFlag {
 
                 if (graph.containsKey(currVer)) {
                     for (String near : graph.get(currVer)) {
-
                         queue.add(near);
                         parent.put(near, currVer);
 
@@ -96,7 +95,6 @@ public class BFSnoFlag {
                 }
                 writer.write(String.format("%-10s| %-20s| %-40s\n", currVer,
                         (graph.containsKey(currVer) ? String.join(", ", graph.get(currVer)) : ""),
-
                         queue.toString()
                 ));
             }

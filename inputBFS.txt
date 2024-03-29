@@ -1,17 +1,10 @@
 A G
-A
-B C D
-B
-I G
-C
-E F
-D
-C F
-I
-G
-E
-G K
-F
-K
+A : B C D
+B : I G
+C : E F
+D : C F
+I : G
+E : G K
+F : K
 
 

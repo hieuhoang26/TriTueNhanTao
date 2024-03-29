@@ -3,15 +3,14 @@ import java.util.*;
 
 
 public class Astar {
-    private Node<String, Integer> startVer, desVer;
+    private Node startVer, desVer;
     private static String filePath = "inputA.txt";
     private static String filePathOut = "outputAstar.txt";
 
     public static void main(String[] args) {
         try {
             Astar x = new Astar();
-            // Đọc file và xây dựng đồ thị
-            Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph = x.readGraphFromFile(filePath);
+            Map<Node, Map<Node, Integer>> graph = x.readGraphFromFile(filePath);
 
             x.printGraph(graph);
             List<String> path = x.bfs(graph);
@@ -21,19 +20,17 @@ public class Astar {
             } else {
                 System.out.println("No path found.");
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> readGraphFromFile(String filePath) throws IOException {
-        Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph = new HashMap<>();
-        startVer = new Node<>();
-        desVer = new Node<>();
+    public Map<Node, Map<Node, Integer>> readGraphFromFile(String filePath) throws IOException {
+        Map<Node, Map<Node, Integer>> graph = new HashMap<>();
+        startVer = new Node();
+        desVer = new Node();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            Node<String, Integer> currentVertex = new Node<>();
 
             if ((line = reader.readLine()) != null && !line.isEmpty()) {
                 String[] x1 = line.trim().split("\\s+");
@@ -41,80 +38,73 @@ public class Astar {
                     String[] x2 = i.split("-");
                     if (x2.length >= 2) {
                         if (startVer.isNull()) {
-                            startVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            startVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         } else {
-                            desVer = new Node<>(x2[0], Integer.valueOf(x2[1]));
+                            desVer = new Node(x2[0], Integer.valueOf(x2[1]));
                         }
                     }
                 }
                 while ((line = reader.readLine()) != null) {
                     line = line.trim();
-                    if (!line.isEmpty()) {
-                        if (currentVertex.isNull()) {
-                            // Nếu chưa có currentVertex, đọc đỉnh mới
-                            String[] parts = line.split("-");
-                            currentVertex.setFirst(parts[0]);
-                            currentVertex.setSecond(Integer.valueOf(parts[1]));
-                        } else {
-                            // Đọc các đỉnh kề và trọng số của currentVertex
-                            String[] neighbors = line.split("\\s+");
-//C-15(9)
-                            for (String neighbor : neighbors) {
-                                String[] parts = neighbor.split("\\(");
-                                //C-15 //9)
-                                String key = parts[0]; //C-15
-                                String value = parts[1].replace(")", ""); //9
-                                //C 15
-                                String[] n2 = key.split("-");
-                                String neighborVertex = n2[0];
-                                int weight = Integer.parseInt(n2[1]);
-                                Node<String, Integer> x = new Node<>(neighborVertex, weight);
-                                if (!graph.containsKey(currentVertex)) {
-                                    graph.put(currentVertex, new HashMap<>());
-                                }
-                                graph.get(currentVertex).put(x, Integer.parseInt(value));
-                            }
-                            currentVertex = new Node<>();
+
+                    String[] list = line.split(" : ");
+                    if (list.length >= 2) {
+                        Node currentVertex = new Node();
+                        currentVertex.readNode(list[0]);
+                        Map<Node, Integer> neighbors = new HashMap<>();
+                        String[] list2 = list[1].split("\\s+");
+                        for (String i : list2) {
+                            String[] parts = i.split("\\(");
+                            String value = parts[1].replace(")", ""); //9
+                            String key = parts[0]; //C-15
+                            Node x = new Node();
+                            x.readNode(key);
+                            neighbors.put(x, Integer.valueOf(value));
                         }
+                        graph.put(currentVertex, neighbors);
                     }
+
+
+
                 }
             }
             return graph;
         }
     }
 
-    public void printGraph(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
+    public void printGraph(Map<Node, Map<Node, Integer>> graph) {
         System.out.println("start: " + startVer.toString());
         if (desVer != null) {
             System.out.println("end: " + desVer.toString());
         }
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> vertex = entry.getKey();
-            Map<Node<String, Integer>, Integer> edges = entry.getValue();
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node vertex = entry.getKey();
+            Map<Node, Integer> edges = entry.getValue();
 
-            System.out.print(vertex.toString() + " : ");
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(vertex.toString()).append(" : ");
 
-            for (Map.Entry<Node<String, Integer>, Integer> edgeEntry : edges.entrySet()) {
-                Node<String, Integer> neighbor = edgeEntry.getKey();
+            for (Map.Entry<Node, Integer> edgeEntry : edges.entrySet()) {
+                Node neighbor = edgeEntry.getKey();
                 int weight = edgeEntry.getValue();
-                System.out.print(neighbor.toString() + "(" + weight + ")" + "  ");
+                stringBuilder.append(neighbor.toString()).append("(").append(weight).append(")  ");
             }
-            System.out.println();
+
+            System.out.println(stringBuilder.toString());
         }
     }
 
-    public List<String> bfs(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph) {
+    public List<String> bfs(Map<Node, Map<Node, Integer>> graph) {
         Map<String, String> parent = new HashMap<>();  // child - parent
 
         Map<String, Integer> fv = new HashMap<>();
 
         Integer costFinal = 0; // chi phi cuoi cung
 
-        Queue<Node<String, Integer>> queue = new LinkedList<>();
+        Queue<Node> queue = new LinkedList<>();
 
         // Thêm điểm bắt đầu vào hàng đợi
         queue.add(startVer);
-
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
             writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", "TT", "TTK", "k(u,v)", "h(v)", "g(v)", "f(v)", "L"));
@@ -122,7 +112,7 @@ public class Astar {
             writer.newLine();
 
             while (!queue.isEmpty()) {
-                Node<String, Integer> currPoint = queue.poll();
+                Node currPoint = queue.poll();
 
                 if ((currPoint.getFirst()).equals(desVer.getFirst())) {
                     writer.write(String.format("%-5s| %-5s| %-8s| %-8s| %-8s| %-8s| %-40s\n", desVer.getFirst(), "TT", "", "", "", "", ""));
@@ -139,10 +129,10 @@ public class Astar {
                     return path;
                 }
                 if (containNode(graph, currPoint.getFirst())) {
-                    //Map<Node<String, Integer>, Integer> neighbors = graph.get(currPoint);
-                    Map<Node<String, Integer>, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
+                    //Map<Node, Integer> neighbors = graph.get(currPoint);
+                    Map<Node, Integer> neighbors = graph.get(getContainNode(graph, currPoint.getFirst()));
 
-                    for (Map.Entry<Node<String, Integer>, Integer> entry : neighbors.entrySet()) {
+                    for (Map.Entry<Node, Integer> entry : neighbors.entrySet()) {
                         Integer k = 0; // chi phí k(u,v)
                         Integer h = 0; // h(x)
                         Integer f = 0; // f(x)
@@ -154,7 +144,7 @@ public class Astar {
                             g = gValue != null ? gValue : 0;
                         }
 
-                        Node<String, Integer> nextPoint = entry.getKey();
+                        Node nextPoint = entry.getKey();
                         k = entry.getValue(); // chi phí
 
                         h = nextPoint.getSecond(); //h(x)
@@ -164,7 +154,7 @@ public class Astar {
                         if ((nextPoint.getFirst()).equals(desVer.getFirst())) {
                             costFinal = g;
                         }
-                        queue.add(new Node<>(nextPoint.getFirst(), f));
+                        queue.add(new Node(nextPoint.getFirst(), f));
                         sortQueue(queue);
                         parent.put(nextPoint.getFirst(), currPoint.getFirst());
 
@@ -189,26 +179,28 @@ public class Astar {
         return Collections.emptyList();
     }
 
-    private boolean containNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> key = entry.getKey();
+    private boolean containNode(Map<Node, Map<Node, Integer>> graph, String string) {
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node key = entry.getKey();
             if (key.getFirst().equals(string)) {
                 return true;
             }
         }
         return false;
     }
-    private Node<String, Integer> getContainNode(Map<Node<String, Integer>, Map<Node<String, Integer>, Integer>> graph, String string) {
-        for (Map.Entry<Node<String, Integer>, Map<Node<String, Integer>, Integer>> entry : graph.entrySet()) {
-            Node<String, Integer> key = entry.getKey();
+
+    private Node getContainNode(Map<Node, Map<Node, Integer>> graph, String string) {
+        for (Map.Entry<Node, Map<Node, Integer>> entry : graph.entrySet()) {
+            Node key = entry.getKey();
             if (key.getFirst().equals(string)) {
                 return key;
             }
         }
         return null;
     }
-    private void sortQueue(Queue<Node<String, Integer>> queue) {
-        List<Node<String, Integer>> temp = new ArrayList<>();
+
+    private void sortQueue(Queue<Node> queue) {
+        List<Node> temp = new ArrayList<>();
         while (!queue.isEmpty()) {
             temp.add(queue.poll());
         }
