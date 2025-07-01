@@ -1,0 +1,4 @@
+            u |                           v |                              res(u,v) |                                            THOA |
+              |                             |                                       |                                              !P |
+                             |                                       |                                                 |
+Mệnh đề P không là hệ quả của logic

@@ -1,10 +1,13 @@
 Vertex    | Neighbors           | Visited                       | In Queue                                
 -------------------------------------------------------------------------------------
-A         | B, C, D             | [A, B, C, D]                  | [B, C, D]                               
-B         | I, G                | [A, B, C, D, G, I]            | [C, D, I, G]                            
-C         | E, F                | [A, B, C, D, E, F, G, I]      | [D, I, G, E, F]                         
-D         | C, F                | [A, B, C, D, E, F, G, I]      | [I, G, E, F]                            
-I         | G                   | [A, B, C, D, E, F, G, I]      | [G, E, F]                               
-G         | TT                  |                               |                                         
+A         | C, D                | [A, C, D]                     | [C, D]                                  
+C         | B, F, H             | [A, B, C, D, F, H]            | [D, B, F, H]                            
+D         | E                   | [A, B, C, D, E, F, H]         | [B, F, H, E]                            
+B         | G, K                | [A, B, C, D, E, F, G, H, K]   | [F, H, E, G, K]                         
+F         | G                   | [A, B, C, D, E, F, G, H, K]   | [H, E, G, K]                            
+H         | K                   | [A, B, C, D, E, F, G, H, K]   | [E, G, K]                               
+E         | B, C                | [A, B, C, D, E, F, G, H, K]   | [G, K]                                  
+G         | K                   | [A, B, C, D, E, F, G, H, K]   | [K]                                     
+K         | TT                  |                               |                                         
 -------------------------------------------------------------------------------------
-Path:A B G 
+Path:A C B K 

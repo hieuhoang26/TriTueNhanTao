@@ -1,11 +1,9 @@
 Vertex    | Neighbors           | Visited                       | In stack                                
 -------------------------------------------------------------------------------------
-A         | B, C, D             | [A, B, C, D]                  | [B, C, D]                               
-D         | C, F                | [A, B, C, D, F]               | [B, C, F]                               
-F         | K                   | [A, B, C, D, F, K]            | [B, C, K]                               
-K         |                     | [A, B, C, D, F, K]            | [B, C]                                  
-C         | E, F                | [A, B, C, D, E, F, K]         | [B, E]                                  
-E         | G, K                | [A, B, C, D, E, F, G, K]      | [B, G]                                  
-G         | TT                  |                               |                                         
+A         | C, D                | [A, C, D]                     | [C, D]                                  
+D         | E                   | [A, C, D, E]                  | [C, E]                                  
+E         | B, C                | [A, B, C, D, E]               | [C, B]                                  
+B         | G, K                | [A, B, C, D, E, G, K]         | [C, G, K]                               
+K         | TT                  |                               |                                         
 -------------------------------------------------------------------------------------
-Path:A C E G 
+Path:A D E B K 

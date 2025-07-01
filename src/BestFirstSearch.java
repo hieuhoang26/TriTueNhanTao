@@ -88,23 +88,25 @@ public class BestFirstSearch {
 
     public List<String> bestfs(Map<Node, List<Node>> graph) {
         Map<String, String> parent = new HashMap<>();  // child - parent
+        Map<Node, Boolean> visited = new HashMap<>();
 
         Queue<Node> queue = new LinkedList<>();
 
 
         queue.add(startVer);
+        visited.put(startVer,true);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePathOut))) {
-            writer.write(String.format("%-10s| %-20s| %-40s\n", "Vertex", "Neighbors", "In Queue"));
-            writer.write("-------------------------------------------------------------------------------------");
+            writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", "Vertex", "Neighbors","Visited", "In Queue"));
+            writer.write("-------------------------------------------------------------------------------------------------------");
             writer.newLine();
 
             while (!queue.isEmpty()) {
                 Node currPoint = queue.poll();
 
                 if (currPoint.equals(desVer)) {
-                    writer.write(String.format("%-10s| %-20s| %-40s\n", desVer.getFirst(), "TT", ""));
-                    writer.write("-------------------------------------------------------------------------------------");
+                    writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", desVer.getFirst(), "TT","", ""));
+                    writer.write("--------------------------------------------------------------------------------------------------");
                     writer.newLine();
 
                     List<String> path = reconstructPath(parent); // truy vết
@@ -119,13 +121,18 @@ public class BestFirstSearch {
                     List<Node> neighbors = graph.get(currPoint);
                     for (Node entry : neighbors) {
                         Node nextPoint = new Node(entry.getFirst(), entry.getSecond());
+                        Boolean isVisited = visited.get(nextPoint);
+                        if(isVisited == null || !isVisited){
+                            visited.put(nextPoint,true);
                             queue.add(nextPoint);
                             sortQueue(queue);
                             parent.put(nextPoint.getFirst(), currPoint.getFirst());
+                        }
                     }
                 }
-                writer.write(String.format("%-10s| %-20s| %-40s\n", currPoint.getFirst(),
+                writer.write(String.format("%-10s| %-20s| %-60s| %-40s\n", currPoint.getFirst(),
                         (graph.containsKey(currPoint) ? graph.get(currPoint) : ""),
+                        visited.keySet(),
                         queue.toString()
                 ));
             }
