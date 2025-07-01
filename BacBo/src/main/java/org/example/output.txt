@@ -1,7 +1,0 @@
-u |            v |                           res(u,v) |                              THOA |                                            
-|              |                             |                                       !P |                                              
-!P|            !A v !B v P, !C v !D v P, |   !A v !B, !C v !D, |                     !C v !D, |                                        
-!C v !D|       !E v C, D, |                  !D v !E, !C, |                          !C, |                                             
-!C|            !E v C, |                     !E, |                                   !E, |                                             
-!E|            E, |                          |                                       |                                                 
-(!E, E) <- (!C, !E v C) <- (!C v !D, D) <- (!P, !C v !D v P)
